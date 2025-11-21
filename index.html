@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8" />
+  <title>Spectrometry Dashboard · Sample</title>
+  <style>
+    :root {
+      --bg-page: #020617;
+      --border-subtle: #1e293b;
+      --accent-ok: #22c55e;
+      --accent-warn: #eab308;
+      --accent-bad: #ef4444;
+      --text-main: #e5e7eb;
+      --text-muted: #9ca3af;
+      --text-soft: #6b7280;
+      --font-sans: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      margin: 0;
+      height: 100vh;
+      background: radial-gradient(circle at top left,#020617,#020617 45%,#020617 100%);
+      color: var(--text-main);
+      font-family: var(--font-sans);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .page {
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Header *********************************************************** */
+    header {
+      height: 5vh;
+      min-height: 52px;
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      background: rgba(15, 23, 42, 0.95);
+      backdrop-filter: blur(12px);
+    }
+
+    header .title {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    header h1 {
+      font-size: 16px;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    header span {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      font-size: 12px;
+    }
+
+    .status-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 999px;
+      background: var(--accent-ok);
+      box-shadow: 0 0 12px rgba(34,197,94,0.8);
+    }
+
+    main {
+      flex: 1;
+      padding: 16px 24px 20px;
+    }
+
+    /* 6 зон: 3 рядки × 2 колонки ************************************** */
+    .zones-grid {
+      height: 100%;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      grid-template-rows: repeat(3, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .zone-card {
+      background: radial-gradient(circle at top left,#020617,#020617 60%,#020617);
+      border-radius: 16px;
+      border: 1px solid rgba(148, 163, 184, 0.15);
+      box-shadow: 0 18px 40px rgba(0,0,0,0.45);
+      padding: 12px 14px 10px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      min-height: 0;
+    }
+
+    .zone-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+      gap: 12px;
+    }
+
+    .zone-title {
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .zone-subtitle {
+      font-size: 11px;
+      color: var(--text-soft);
+      margin-top: 2px;
+    }
+
+    .zone-badge {
+      font-size: 11px;
+      padding: 3px 8px;
+      border-radius: 999px;
+      background: rgba(34, 197, 94, 0.1);
+      color: var(--accent-ok);
+      border: 1px solid rgba(34, 197, 94, 0.7);
+      white-space: nowrap;
+    }
+
+    .zone-badge.warn {
+      background: rgba(234, 179, 8, 0.08);
+      color: var(--accent-warn);
+      border-color: rgba(234, 179, 8, 0.7);
+    }
+
+    .zone-badge.alarm {
+      background: rgba(239, 68, 68, 0.08);
+      color: var(--accent-bad);
+      border-color: rgba(239, 68, 68, 0.7);
+    }
+
+    /* Список вимірювань у зоні (3 останні) **************************** */
+    .measurement-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+
+    .measurement-block {
+      border-radius: 8px;
+      border: 1px solid rgba(148, 163, 184, 0.4);
+      background: rgba(15, 23, 42, 0.85);
+      padding: 4px 6px 6px;
+      font-size: 10px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .measurement-label-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 2px;
+      gap: 6px;
+    }
+
+    .measurement-label {
+      font-size: 10px;
+      color: var(--text-main);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .measurement-time {
+      font-size: 10px;
+      color: var(--text-soft);
+      white-space: nowrap;
+    }
+
+.measurement-table-wrapper {
+  margin-top: 2px;
+  overflow-x: hidden;
+  width: 100%;
+}
+
+.measurement-table {
+  border-collapse: collapse;
+  width: 100%;
+  table-layout: fixed;
+  font-size: 10px;
+}
+
+    .measurement-table th,
+    .measurement-table td {
+      padding: 1px 4px;
+      text-align: right;
+      white-space: nowrap;
+    }
+
+    .measurement-table th {
+      font-weight: 500;
+      color: var(--text-muted);
+    }
+
+    .measurement-table td {
+      color: var(--text-main);
+    }
+
+    .measurement-table th:first-child,
+    .measurement-table td:first-child {
+      padding-left: 0;
+    }
+
+    .measurement-table th:last-child,
+    .measurement-table td:last-child {
+      padding-right: 0;
+    }
+
+    @media (max-width: 1400px) {
+      .zones-grid {
+        grid-template-columns: 1fr;
+        grid-template-rows: repeat(6, minmax(0, 1fr));
+      }
+    }
+  </style>
+</head>
+<body>
+<div class="page">
+  <header>
+    <div class="title">
+      <h1>Spectrometry Dashboard</h1>
+      <span>ДП-6 · ДП-7 · ДП-8 — печі та розливні, 3 останні вимірювання</span>
+    </div>
+    <div class="header-right">
+      <div class="status-dot"></div>
+      <span id="last-update">Останнє оновлення: —</span>
+    </div>
+  </header>
+
+  <main>
+    <div id="zones" class="zones-grid"></div>
+  </main>
+</div>
+
+<script>
+  // Порядок елементів у таблиці
+  const ELEMENT_ORDER = [
+    "C","S","P","Si","Cr","Ni","Cu","As","V","Ti","Mg","Zn"
+  ];
+
+  // DEMO: формат А (zoneId, furnace, type, label, timestamp, elements)
+  const dashboardData = {
+    lastUpdate: "2025-08-14T22:57:31",
+    zones: [
+      // Ряд 1: ДП-6
+      {
+        zoneId: 1,
+        furnace: 6,
+        type: "furnace",
+        status: "OK",
+        measurements: [
+          {
+            label: "піч, ДП-6, 77081, летка 1, пятак 1, ковш 441",
+            timestamp: "2025-08-14T18:15:20",
+            elements: { C: 2.66, S: 0.028, P: 0.052, Si: 2.98, Cr: 0.042, Ni: 0.017, Cu: 0.087, As: 0.002 }
+          },
+          {
+            label: "піч, ДП-6, 77081, летка 1, пятак 1, ковш 441",
+            timestamp: "2025-08-14T18:10:10",
+            elements: { C: 2.60, S: 0.027, P: 0.051, Si: 2.90, Cr: 0.041, Ni: 0.016, Cu: 0.086, As: 0.002 }
+          },
+          {
+            label: "піч, ДП-6, 77081, летка 1, пятак 1, ковш 441",
+            timestamp: "2025-08-14T18:05:00",
+            elements: { C: 2.58, S: 0.027, P: 0.050, Si: 2.88, Cr: 0.040, Ni: 0.016, Cu: 0.085, As: 0.002 }
+          }
+        ]
+      },
+      {
+        zoneId: 4,
+        furnace: 6,
+        type: "ladle",
+        status: "OK",
+        measurements: [
+          {
+            label: "розливна, ДП-6, 77081, летка 1, пятак 1, ковш 441",
+            timestamp: "2025-08-14T18:19:00",
+            elements: { C: 2.60, S: 0.027, P: 0.051, Si: 2.95, Cr: 0.042, Ni: 0.017, Cu: 0.083, As: 0.002 }
+          },
+          {
+            label: "розливна, ДП-6, 77081, летка 1, пятак 1, ковш 441",
+            timestamp: "2025-08-14T18:14:00",
+            elements: { C: 2.58, S: 0.027, P: 0.051, Si: 2.93, Cr: 0.041, Ni: 0.016, Cu: 0.082, As: 0.002 }
+          },
+          {
+            label: "розливна, ДП-6, 77081, летка 1, пятак 1, ковш 441",
+            timestamp: "2025-08-14T18:09:00",
+            elements: { C: 2.56, S: 0.026, P: 0.050, Si: 2.90, Cr: 0.041, Ni: 0.016, Cu: 0.081, As: 0.002 }
+          }
+        ]
+      },
+
+      // Ряд 2: ДП-7
+      {
+        zoneId: 2,
+        furnace: 7,
+        type: "furnace",
+        status: "WARN",
+        measurements: [
+          {
+            label: "піч, ДП-7, 77082, летка 1, пятак 1, ковш 964",
+            timestamp: "2025-08-14T18:17:31",
+            elements: { C: 3.32, S: 0.021, P: 0.048, Si: 3.07, Cr: 0.041, Ni: 0.014, Cu: 0.091, As: 0.003 }
+          },
+          {
+            label: "піч, ДП-7, 77082, летка 1, пятак 1, ковш 964",
+            timestamp: "2025-08-14T18:12:30",
+            elements: { C: 3.30, S: 0.021, P: 0.047, Si: 3.05, Cr: 0.040, Ni: 0.014, Cu: 0.089, As: 0.003 }
+          },
+          {
+            label: "піч, ДП-7, 77082, летка 1, пятак 1, ковш 964",
+            timestamp: "2025-08-14T18:07:20",
+            elements: { C: 3.28, S: 0.021, P: 0.047, Si: 3.03, Cr: 0.040, Ni: 0.014, Cu: 0.088, As: 0.003 }
+          }
+        ]
+      },
+      {
+        zoneId: 5,
+        furnace: 7,
+        type: "ladle",
+        status: "OK",
+        measurements: [
+          {
+            label: "розливна, ДП-7, 77082, летка 1, пятак 1, ковш 964",
+            timestamp: "2025-08-14T18:22:00",
+            elements: { C: 3.26, S: 0.021, P: 0.047, Si: 3.02, Cr: 0.040, Ni: 0.014, Cu: 0.087, As: 0.003 }
+          },
+          {
+            label: "розливна, ДП-7, 77082, летка 1, пятак 1, ковш 964",
+            timestamp: "2025-08-14T18:17:00",
+            elements: { C: 3.25, S: 0.021, P: 0.047, Si: 3.00, Cr: 0.040, Ni: 0.014, Cu: 0.086, As: 0.003 }
+          },
+          {
+            label: "розливна, ДП-7, 77082, летка 1, пятак 1, ковш 964",
+            timestamp: "2025-08-14T18:12:00",
+            elements: { C: 3.24, S: 0.021, P: 0.047, Si: 2.99, Cr: 0.040, Ni: 0.014, Cu: 0.085, As: 0.003 }
+          }
+        ]
+      },
+
+      // Ряд 3: ДП-8
+      {
+        zoneId: 3,
+        furnace: 8,
+        type: "furnace",
+        status: "ALARM",
+        measurements: [
+          {
+            label: "піч, ДП-8, 77083, летка 2, пятак 2, ковш 10122",
+            timestamp: "2025-08-14T18:19:00",
+            elements: { C: 3.80, S: 0.022, P: 0.032, Si: 3.80, Cr: 0.042, Ni: 0.015, Cu: 0.020, As: 0.003 }
+          },
+          {
+            label: "піч, ДП-8, 77083, летка 2, пятак 2, ковш 10122",
+            timestamp: "2025-08-14T18:14:00",
+            elements: { C: 3.78, S: 0.022, P: 0.032, Si: 3.78, Cr: 0.042, Ni: 0.015, Cu: 0.020, As: 0.003 }
+          },
+          {
+            label: "піч, ДП-8, 77083, летка 2, пятак 2, ковш 10122",
+            timestamp: "2025-08-14T18:09:00",
+            elements: { C: 3.76, S: 0.022, P: 0.032, Si: 3.76, Cr: 0.042, Ni: 0.015, Cu: 0.020, As: 0.003 }
+          }
+        ]
+      },
+      {
+        zoneId: 6,
+        furnace: 8,
+        type: "ladle",
+        status: "WARN",
+        measurements: [
+          {
+            label: "розливна, ДП-8, 77083, летка 2, пятак 2, ковш 10122",
+            timestamp: "2025-08-14T18:24:00",
+            elements: { C: 3.78, S: 0.022, P: 0.032, Si: 3.79, Cr: 0.042, Ni: 0.015, Cu: 0.020, As: 0.003 }
+          },
+          {
+            label: "розливна, ДП-8, 77083, летка 2, пятак 2, ковш 10122",
+            timestamp: "2025-08-14T18:19:30",
+            elements: { C: 3.77, S: 0.022, P: 0.032, Si: 3.78, Cr: 0.042, Ni: 0.015, Cu: 0.020, As: 0.003 }
+          },
+          {
+            label: "розливна, ДП-8, 77083, летка 2, пятак 2, ковш 10122",
+            timestamp: "2025-08-14T18:15:00",
+            elements: { C: 3.76, S: 0.022, P: 0.032, Si: 3.77, Cr: 0.042, Ni: 0.015, Cu: 0.020, As: 0.003 }
+          }
+        ]
+      }
+    ]
+  };
+
+  // ==== helpers ========================================================
+
+  function formatDateTime(iso) {
+    if (!iso) return "—";
+    const d = new Date(iso);
+    const pad = n => n.toString().padStart(2, "0");
+    return `${pad(d.getDate())}.${pad(d.getMonth()+1)}.${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+  }
+
+  function zoneStatusClass(status) {
+    if (status === "ALARM") return "zone-badge alarm";
+    if (status === "WARN") return "zone-badge warn";
+    return "zone-badge";
+  }
+
+  function zoneStatusLabel(status) {
+    if (status === "ALARM") return "Тривога";
+    if (status === "WARN") return "Контроль";
+    return "Норма";
+  }
+
+  // ==== rendering ======================================================
+
+  function renderMeasurementRow(measurement) {
+    const headerCells = ELEMENT_ORDER.map(code => `<th>${code}</th>`).join("");
+    const valueCells = ELEMENT_ORDER.map(code => {
+      const val = measurement.elements[code];
+      return `<td>${val !== undefined ? val : ""}</td>`;
+    }).join("");
+
+    const label = measurement.label || "";
+    const time = formatDateTime(measurement.timestamp);
+
+    return `
+      <div class="measurement-block">
+        <div class="measurement-label-row">
+          <div class="measurement-label">${label}</div>
+          <div class="measurement-time">${time}</div>
+        </div>
+        <div class="measurement-table-wrapper">
+          <table class="measurement-table">
+            <thead>
+              <tr>${headerCells}</tr>
+            </thead>
+            <tbody>
+              <tr>${valueCells}</tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    `;
+  }
+
+  function renderZone(zone) {
+    const furnaceLabel = `ДП-${zone.furnace}`;
+    const typeLabel = zone.type === "furnace" ? "Піч" : "Розливні";
+
+    const title = `${furnaceLabel} · ${typeLabel}`;
+    const subtitle = "3 останні вимірювання";
+
+    const measurements = (zone.measurements || []).slice(0, 3);
+    const measurementHtml = measurements.length
+      ? measurements.map(m => renderMeasurementRow(m)).join("")
+      : `<div style="font-size:10px;color:var(--text-soft);padding:2px 4px;">Немає даних вимірів</div>`;
+
+    return `
+      <section class="zone-card">
+        <div class="zone-header">
+          <div>
+            <div class="zone-title">${title}</div>
+            <div class="zone-subtitle">${subtitle}</div>
+          </div>
+        </div>
+        <div class="measurement-list">
+          ${measurementHtml}
+        </div>
+      </section>
+    `;
+  }
+
+  function renderDashboard(data) {
+    const container = document.getElementById("zones");
+    container.innerHTML = data.zones.map(renderZone).join("");
+    document.getElementById("last-update").textContent =
+      "Останнє оновлення: " + formatDateTime(data.lastUpdate);
+  }
+
+  // Ініціалізація (зараз локальні дані; далі можна замінити на fetch('/api/zones'))
+  renderDashboard(dashboardData);
+</script>
+</body>
+</html>
