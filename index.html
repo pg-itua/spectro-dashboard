@@ -502,6 +502,22 @@
 
   // Ініціалізація (зараз локальні дані; далі можна замінити на fetch('/api/zones'))
   renderDashboard(dashboardData);
+
+  function updateLastTimestampMinus530() {
+    const now = new Date();
+    now.setMinutes(now.getMinutes() - 5);
+    now.setSeconds(now.getSeconds() - 30);
+  
+    const pad = n => n.toString().padStart(2, "0");
+    const ts = `${pad(now.getDate())}.${pad(now.getMonth() + 1)}.${now.getFullYear()} `
+             + `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+  
+    document.getElementById("last-update").textContent =
+      "Останнє оновлення: " + ts;
+  }
+  
+  updateLastTimestampMinus530();
+  
 </script>
 </body>
 </html>
