@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="uk">
 <head>
@@ -72,7 +73,7 @@
     .header-right {
       display: flex;
       align-items: center;
-      gap: 16px;
+      gap: 8px;
       font-size: 12px;
     }
 
@@ -155,7 +156,7 @@
     .measurement-list {
       display: flex;
       flex-direction: column;
-      gap: 6px;
+      gap: 4px;
       overflow-y: auto;
       padding-right: 4px;
     }
@@ -165,7 +166,7 @@
       border: 1px solid rgba(148, 163, 184, 0.4);
       background: rgba(15, 23, 42, 0.85);
       padding: 4px 6px 6px;
-      font-size: 10px;
+      font-size: 14px;
       display: flex;
       flex-direction: column;
     }
@@ -179,7 +180,7 @@
     }
 
     .measurement-label {
-      font-size: 10px;
+      font-size: 15px;
       color: var(--text-main);
       white-space: nowrap;
       overflow: hidden;
@@ -187,7 +188,7 @@
     }
 
     .measurement-time {
-      font-size: 10px;
+      font-size: 14px;
       color: var(--text-soft);
       white-space: nowrap;
     }
@@ -201,18 +202,25 @@
 .measurement-table {
   border-collapse: collapse;
   width: 100%;
-  table-layout: fixed;
-  font-size: 10px;
+  table-layout: fixed; font-family: 'Roboto Mono', monospace;
+  font-size: 16px;
 }
+
+    .measurement-table th {
+      text-align: center !important;
+	  
+    }
 
     .measurement-table th,
     .measurement-table td {
-      padding: 1px 4px;
-      text-align: right;
+      padding: 2px 6px;
       white-space: nowrap;
+      font-variant-numeric: tabular-nums;
+      text-align: center;
     }
-
+    
     .measurement-table th {
+	  font-size: 16px;
       font-weight: 500;
       color: var(--text-muted);
     }
@@ -237,14 +245,18 @@
         grid-template-rows: repeat(6, minmax(0, 1fr));
       }
     }
-  </style>
+  .measurement-table th:nth-child(even),
+    .measurement-table td:nth-child(even) {
+      background: #152033;
+    }
+</style>
 </head>
 <body>
 <div class="page">
   <header>
     <div class="title">
       <h1>Spectrometry Dashboard</h1>
-      <span>ДП-6 · ДП-7 · ДП-8 — печі та розливні, 3 останні вимірювання</span>
+      <span>ДП-6 · ДП-7 · ДП-8 — печі та розливні, </span>
     </div>
     <div class="header-right">
       <div class="status-dot"></div>
@@ -471,7 +483,7 @@
     const typeLabel = zone.type === "furnace" ? "Піч" : "Розливні";
 
     const title = `${furnaceLabel} · ${typeLabel}`;
-    const subtitle = "3 останні вимірювання";
+    const subtitle = "";
 
     const measurements = (zone.measurements || []).slice(0, 3);
     const measurementHtml = measurements.length
@@ -480,12 +492,7 @@
 
     return `
       <section class="zone-card">
-        <div class="zone-header">
-          <div>
-            <div class="zone-title">${title}</div>
-            <div class="zone-subtitle">${subtitle}</div>
-          </div>
-        </div>
+
         <div class="measurement-list">
           ${measurementHtml}
         </div>
@@ -521,3 +528,4 @@
 </script>
 </body>
 </html>
+
